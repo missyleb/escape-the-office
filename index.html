@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Out of Office - Escape the Office. For Real.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .landing-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .landing-header h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .landing-header .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .landing-header .description {
+            font-size: 1.1em;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .play-prompt {
+            font-size: 1.2em;
+            color: #ffd93d;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .game-canvas-container {
+            position: relative;
+            background: linear-gradient(to right, #95a5a6 0%, #34495e 30%, #3498db 60%, #2ecc71 100%);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(to right, #6b7280 0%, #4b5563 100%);
+            transition: background 3s ease;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .stat {
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+
+        .powerup-indicator {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,215,0,0.9);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .instructions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .instruction-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+
+        .achievement {
+            background: rgba(255,215,0,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #ffd93d;
+        }
+
+        .email-capture {
+            margin: 25px 0;
+        }
+
+        .email-capture input {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            width: 250px;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+
+        .email-capture button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .gamma-cta {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .gamma-cta h3 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .cta-btn {
+            background: white;
+            color: #ee5a24;
+            font-weight: bold;
+            font-size: 1.2em;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .leaderboard {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .leaderboard h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .leaderboard-entry-form {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .leaderboard-entry-form h4 {
+            margin-bottom: 15px;
+            color: #ffd93d;
+        }
+
+        .leaderboard-entry-form input {
+            display: block;
+            margin: 10px auto;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .hat-notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,215,0,0.95);
+            color: black;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 20;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .landing-header h1 {
+                font-size: 2.5em;
+            }
+            
+            .instructions {
+                grid-template-columns: 1fr;
+            }
+            
+            .email-capture input {
+                width: 200px;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-header">
+        <h1>🏃‍♂️ Escape the Office. For Real.</h1>
+        <p class="subtitle">Want to leave the Office for good? Try Gamma.</p>
+        <p class="description">The only tool you'll ever need for presentations, docs, and ideas — without the meetings.</p>
+        <p class="play-prompt">Try surviving a day in the Office... We turned corporate burnout into a video game.</p>
+    </div>
+
+    <div class="game-container">
+        <div class="instructions">
+            <div class="instruction-item">
+                <strong>🚀 SPACE</strong><br>Jump over obstacles
+            </div>
+            <div class="instruction-item">
+                <strong>⬇️ DOWN ARROW</strong><br>Slide under barriers
+            </div>
+            <div class="instruction-item">
+                <strong>🎩 OOO Hat</strong><br>10 seconds invincible!
+            </div>
+            <div class="instruction-item">
+                <strong>☕ Coffee</strong><br>Speed boost mode!
+            </div>
+        </div>
+
+        <div class="game-canvas-container">
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+            <div class="game-ui">
+                <div class="stat">Distance: <span id="distance">0</span>m</div>
+                <div class="stat">Time: <span id="time">0:00</span></div>
+                <div class="stat">Score: <span id="score">0</span></div>
+            </div>
+            <div class="powerup-indicator" id="powerupIndicator">🎩 OOO HAT ACTIVATED!</div>
+            <div class="hat-notification" id="hatNotification" style="display: none;">
+                <!-- Removed - no longer used -->
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" onclick="startGame()" id="startBtn">🏃‍♂️ Start Escaping</button>
+            <button class="control-btn" onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+        </div>
+    </div>
+
+    <div class="leaderboard">
+        <h3>🏆 Furthest from the Office</h3>
+        <div class="leaderboard-entry">
+            <span>1. Sarah M.</span>
+            <span>2,847m • 3:42 • 🎩</span>
+        </div>
+        <div class="leaderboard-entry">
+            <span>2. Mike R.</span>
+            <span>2,203m • 2:58</span>
+        </div>
+        <div class="leaderboard-entry">
+            <span>3. Alex K.</span>
+            <span>1,956m • 2:31 • 🎩</span>
+        </div>
+        <div class="leaderboard-entry">
+            <span>4. Jamie L.</span>
+            <span>1,742m • 2:14</span>
+        </div>
+        <div class="leaderboard-entry">
+            <span>5. Your Turn!</span>
+            <span>Beat 1,742m</span>
+        </div>
+    </div>
+
+    <div class="gamma-cta">
+        <h3>🚀 Create Without Meetings. Create with Gamma.</h3>
+        <p>You've escaped the office in our game - now escape boring presentations forever!</p>
+        <button class="cta-btn" onclick="window.open('https://gamma.app', '_blank')">
+            Try Gamma Free - No Meetings Required
+        </button>
+    </div>
+
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="gameOverTitle">HR has questions about your departure</h2>
+            <div class="score-display">
+                <div>Distance: <span id="finalDistance">0</span>m</div>
+                <div>Time: <span id="finalTime">0:00</span></div>
+                <div>Score: <span id="finalScore">0</span></div>
+                <div id="hatUnlocked" class="achievement" style="display: none;">
+                    🎩 Hat Unlocked! Check your email for updates.
+                </div>
+            </div>
+            <div class="email-capture">
+                <input type="email" placeholder="Get bonus life + Gamma updates" id="bonusEmail">
+                <button onclick="submitBonusEmail()">Get Bonus Life!</button>
+            </div>
+            <button class="control-btn" onclick="restartGame()">Try Again</button>
+            <button class="control-btn" onclick="shareScore()">Share Score</button>
+        </div>
+    </div>
+
+    <script>
+        class OutOfOfficeRunner {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = 800;
+                this.canvas.height = 400;
+                
+                this.isPlaying = false;
+                this.gameSpeed = 3;
+                this.distance = 0;
+                this.score = 0;
+                this.startTime = 0;
+                this.currentTime = 0;
+                
+                // Load the 8-bit cat image
+                this.catImage = new Image();
+                this.catImage.src = 'data:image/svg+xml;base64,' + btoa(`
+                    <svg width="40" height="60" viewBox="0 0 40 60" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 8-bit style black cat -->
+                        <!-- Cat ears -->
+                        <rect x="8" y="4" width="8" height="8" fill="#000000"/>
+                        <rect x="24" y="4" width="8" height="8" fill="#000000"/>
+                        <rect x="12" y="8" width="4" height="4" fill="#1a1a1a"/>
+                        <rect x="24" y="8" width="4" height="4" fill="#1a1a1a"/>
+                        
+                        <!-- Cat head -->
+                        <rect x="8" y="12" width="24" height="20" fill="#000000"/>
+                        <rect x="4" y="16" width="32" height="12" fill="#000000"/>
+                        
+                        <!-- Cat body -->
+                        <rect x="12" y="32" width="16" height="24" fill="#000000"/>
+                        <rect x="8" y="36" width="24" height="16" fill="#000000"/>
+                        
+                        <!-- Three green eyes (8-bit style) -->
+                        <rect x="12" y="18" width="4" height="4" fill="#00ff00"/>
+                        <rect x="20" y="16" width="4" height="4" fill="#00ff00"/>
+                        <rect x="28" y="18" width="4" height="4" fill="#00ff00"/>
+                        
+                        <!-- Eye highlights -->
+                        <rect x="13" y="18" width="2" height="2" fill="#66ff66"/>
+                        <rect x="21" y="16" width="2" height="2" fill="#66ff66"/>
+                        <rect x="29" y="18" width="2" height="2" fill="#66ff66"/>
+                        
+                        <!-- Pupils -->
+                        <rect x="14" y="19" width="1" height="1" fill="#003300"/>
+                        <rect x="22" y="17" width="1" height="1" fill="#003300"/>
+                        <rect x="30" y="19" width="1" height="1" fill="#003300"/>
+                        
+                        <!-- Nose -->
+                        <rect x="19" y="24" width="2" height="2" fill="#ff6b6b"/>
+                        
+                        <!-- Mouth -->
+                        <rect x="17" y="26" width="2" height="1" fill="#1a1a1a"/>
+                        <rect x="21" y="26" width="2" height="1" fill="#1a1a1a"/>
+                        
+                        <!-- Cat paws -->
+                        <rect x="12" y="52" width="4" height="4" fill="#000000"/>
+                        <rect x="24" y="52" width="4" height="4" fill="#000000"/>
+                        
+                        <!-- Tail -->
+                        <rect x="32" y="40" width="4" height="12" fill="#000000"/>
+                        <rect x="36" y="36" width="4" height="8" fill="#000000"/>
+                    </svg>
+                `);
+                this.catImageLoaded = false;
+                this.catImage.onload = () => {
+                    this.catImageLoaded = true;
+                };
+                
+                this.player = {
+                    x: 100,
+                    y: 280,
+                    width: 40,
+                    height: 60,
+                    velocityY: 0,
+                    isJumping: false,
+                    isSliding: false,
+                    groundY: 280
+                };
+                
+                this.obstacles = [];
+                this.powerups = [];
+                this.particles = [];
+                
+                this.powerupStates = {
+                    hat: { active: false, duration: 0 },
+                    coffee: { active: false, duration: 0 },
+                    gamma: { active: false, duration: 0 }
+                };
+                
+                this.hatCollected = false;
+                this.achievements = [];
+                
+                this.bindEvents();
+                this.gameLoop();
+            }
+            
+            bindEvents() {
+                document.addEventListener('keydown', (e) => {
+                    if (!this.isPlaying) return;
+                    
+                    switch(e.code) {
+                        case 'Space':
+                            e.preventDefault();
+                            this.jump();
+                            break;
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            this.slide();
+                            break;
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    if (e.code === 'ArrowDown') {
+                        this.player.isSliding = false;
+                    }
+                });
+            }
+            
+            jump() {
+                if (!this.player.isJumping) {
+                    this.player.velocityY = -18;
+                    this.player.isJumping = true;
+                }
+            }
+            
+            slide() {
+                if (!this.player.isJumping) {
+                    this.player.isSliding = true;
+                }
+            }
+            
+            spawnObstacle() {
+                const lastObstacle = this.obstacles[this.obstacles.length - 1];
+                const minDistance = 250;
+                
+                if (!lastObstacle || (this.canvas.width - lastObstacle.x) > minDistance) {
+                    if (Math.random() < 0.012) {
+                        const types = ['meeting', 'paperwork', 'calendar'];
+                        const type = types[Math.floor(Math.random() * types.length)];
+                        
+                        let obstacleY, obstacleHeight;
+                        
+                        if (type === 'calendar') {
+                            obstacleY = 50 + Math.random() * 120;
+                            obstacleHeight = 45;
+                        } else if (type === 'paperwork') {
+                            obstacleY = 285;
+                            obstacleHeight = 55;
+                        } else {
+                            obstacleY = 295;
+                            obstacleHeight = 45;
+                        }
+                        
+                        this.obstacles.push({
+                            x: this.canvas.width,
+                            y: obstacleY,
+                            width: 65,
+                            height: obstacleHeight,
+                            type: type,
+                            color: type === 'meeting' ? '#e74c3c' : type === 'paperwork' ? '#8b4513' : '#f39c12'
+                        });
+                    }
+                }
+            }
+            
+            spawnPowerup() {
+                const lastObstacle = this.obstacles[this.obstacles.length - 1];
+                const safeDistance = 150;
+                
+                if ((!lastObstacle || (this.canvas.width - lastObstacle.x) > safeDistance) && Math.random() < 0.003) {
+                    const types = ['hat', 'coffee', 'gamma', 'banana'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    
+                    this.powerups.push({
+                        x: this.canvas.width,
+                        y: 180 + Math.random() * 80,
+                        width: 35,
+                        height: 35,
+                        type: type,
+                        collected: false
+                    });
+                }
+            }
+            
+            updatePlayer() {
+                if (this.player.isJumping) {
+                    this.player.velocityY += 0.9;
+                    this.player.y += this.player.velocityY;
+                    
+                    if (this.player.y >= this.player.groundY) {
+                        this.player.y = this.player.groundY;
+                        this.player.velocityY = 0;
+                        this.player.isJumping = false;
+                    }
+                }
+                
+                if (this.player.isSliding && !this.player.isJumping) {
+                    this.player.height = 30;
+                    this.player.y = this.player.groundY + 30;
+                } else if (!this.player.isSliding) {
+                    this.player.height = 60;
+                    if (!this.player.isJumping) {
+                        this.player.y = this.player.groundY;
+                    }
+                }
+            }
+            
+            updateObstacles() {
+                this.obstacles = this.obstacles.filter(obstacle => {
+                    const speedMultiplier = this.powerupStates.coffee.active ? 1.5 : 1;
+                    obstacle.x -= this.gameSpeed * speedMultiplier;
+                    return obstacle.x > -obstacle.width;
+                });
+            }
+            
+            updatePowerups() {
+                this.powerups = this.powerups.filter(powerup => {
+                    const speedMultiplier = this.powerupStates.coffee.active ? 1.5 : 1;
+                    powerup.x -= this.gameSpeed * speedMultiplier;
+                    return powerup.x > -powerup.width;
+                });
+            }
+            
+            checkCollisions() {
+                if (!this.powerupStates.hat.active) {
+                    for (let obstacle of this.obstacles) {
+                        if (this.isColliding(this.player, obstacle)) {
+                            this.gameOver();
+                            return;
+                        }
+                    }
+                }
+                
+                for (let powerup of this.powerups) {
+                    if (!powerup.collected && this.isColliding(this.player, powerup)) {
+                        this.collectPowerup(powerup);
+                        powerup.collected = true;
+                    }
+                }
+            }
+            
+            isColliding(rect1, rect2) {
+                const buffer = 10;
+                return rect1.x + buffer < rect2.x + rect2.width - buffer &&
+                       rect1.x + rect1.width - buffer > rect2.x + buffer &&
+                       rect1.y + buffer < rect2.y + rect2.height - buffer &&
+                       rect1.y + rect1.height - buffer > rect2.y + buffer;
+            }
+            
+            collectPowerup(powerup) {
+                switch(powerup.type) {
+                    case 'hat':
+                        this.powerupStates.hat = { active: true, duration: 600 };
+                        this.showPowerupIndicator('🎩 OOO HAT ACTIVATED!');
+                        this.hatCollected = true;
+                        break;
+                    case 'coffee':
+                        this.powerupStates.coffee = { active: true, duration: 300 };
+                        this.showPowerupIndicator('☕ SPEED BOOST!');
+                        break;
+                    case 'gamma':
+                        this.clearObstacles();
+                        this.showPowerupIndicator('💎 GAMMA BLAST!');
+                        break;
+                    case 'banana':
+                        this.score += 500;
+                        this.showPowerupIndicator('🍌 +500 POINTS!');
+                        break;
+                }
+                this.score += 100;
+            }
+            
+            showPowerupIndicator(text) {
+                const indicator = document.getElementById('powerupIndicator');
+                indicator.textContent = text;
+                indicator.style.display = 'block';
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+                }, 2000);
+            }
+            
+            showHatNotification() {
+                document.getElementById('hatNotification').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('hatNotification').style.display = 'none';
+                }, 5000);
+            }
+            
+            clearObstacles() {
+                this.obstacles = [];
+            }
+            
+            updatePowerupStates() {
+                Object.keys(this.powerupStates).forEach(key => {
+                    if (this.powerupStates[key].active) {
+                        this.powerupStates[key].duration--;
+                        if (this.powerupStates[key].duration <= 0) {
+                            this.powerupStates[key].active = false;
+                        }
+                    }
+                });
+            }
+            
+            updateBackground() {
+                const timeInSeconds = this.currentTime / 60;
+                const canvas = document.getElementById('gameCanvas');
+                
+                if (timeInSeconds < 10) {
+                    canvas.style.background = 'linear-gradient(to right, #6b7280 0%, #4b5563 100%)';
+                } else if (timeInSeconds < 20) {
+                    canvas.style.background = 'linear-gradient(to right, #4b5563 0%, #60a5fa 50%, #93c5fd 100%)';
+                } else if (timeInSeconds < 35) {
+                    canvas.style.background = 'linear-gradient(to right, #60a5fa 0%, #93c5fd 50%, #dbeafe 100%)';
+                } else {
+                    canvas.style.background = 'linear-gradient(to right, #f59e0b 0%, #f97316 50%, #ec4899 100%)';
+                }
+            }
+            
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const timeInSeconds = this.currentTime / 60;
+                if (timeInSeconds < 10) {
+                    this.ctx.fillStyle = '#1f2937';
+                    this.ctx.fillRect(600, 50, 120, 80);
+                    
+                    this.ctx.fillStyle = '#4b5563';
+                    this.ctx.fillRect(610, 60, 45, 30);
+                    this.ctx.fillRect(665, 60, 45, 30);
+                    this.ctx.fillRect(610, 100, 45, 20);
+                    this.ctx.fillRect(665, 100, 45, 20);
+                    
+                    this.ctx.fillStyle = '#1f2937';
+                    this.ctx.fillRect(655, 60, 5, 60);
+                    this.ctx.fillRect(610, 90, 100, 5);
+                    
+                    this.ctx.fillStyle = '#8b5cf6';
+                    this.ctx.fillRect(450, 300, 100, 40);
+                    
+                    this.ctx.fillStyle = '#1f2937';
+                    this.ctx.fillRect(470, 270, 60, 40);
+                    this.ctx.fillStyle = '#3b82f6';
+                    this.ctx.fillRect(475, 275, 50, 30);
+                } else {
+                    const cloudOffset = (this.currentTime * 0.5) % 900;
+                    
+                    for (let i = 0; i < 5; i++) {
+                        const x = (i * 200 - cloudOffset) % 900;
+                        const y = 50 + (i % 3) * 30;
+                        if (x > -60 && x < this.canvas.width + 60) {
+                            this.ctx.fillStyle = '#ffffff';
+                            this.ctx.fillRect(x + 8, y, 32, 16);
+                            this.ctx.fillRect(x, y + 8, 48, 8);
+                            this.ctx.fillRect(x + 16, y - 8, 16, 8);
+                            this.ctx.fillRect(x + 32, y + 8, 8, 8);
+                        }
+                    }
+                    
+                    this.ctx.fillStyle = '#fbbf24';
+                    this.ctx.fillRect(650, 30, 32, 32);
+                    this.ctx.fillRect(658, 22, 16, 16);
+                    this.ctx.fillRect(674, 30, 8, 32);
+                    this.ctx.fillRect(642, 30, 8, 32);
+                    this.ctx.fillRect(650, 22, 32, 8);
+                    this.ctx.fillRect(650, 54, 32, 8);
+                }
+                
+                this.ctx.fillStyle = timeInSeconds < 10 ? '#374151' : '#22c55e';
+                this.ctx.fillRect(0, 340, this.canvas.width, 60);
+                
+                if (this.catImageLoaded) {
+                    if (this.powerupStates.hat.active) {
+                        this.ctx.shadowColor = '#ffd700';
+                        this.ctx.shadowBlur = 15;
+                    }
+                    
+                    if (this.powerupStates.coffee.active) {
+                        this.ctx.fillStyle = '#00ff00';
+                        for (let i = 0; i < 4; i++) {
+                            this.ctx.fillRect(this.player.x - 15 - i * 8, this.player.y + 15 + i * 8, 6, 2);
+                            this.ctx.fillRect(this.player.x - 20 - i * 8, this.player.y + 25 + i * 6, 8, 2);
+                        }
+                    }
+                    
+                    this.ctx.drawImage(this.catImage, this.player.x, this.player.y, this.player.width, this.player.height);
+                    
+                    this.ctx.shadowColor = 'transparent';
+                    this.ctx.shadowBlur = 0;
+                    
+                    if (this.powerupStates.hat.active) {
+                        this.ctx.fillStyle = '#8b4513';
+                        this.ctx.fillRect(this.player.x + 8, this.player.y - 8, 24, 8);
+                        this.ctx.fillStyle = '#654321';
+                        this.ctx.fillRect(this.player.x + 4, this.player.y - 4, 32, 4);
+                        this.ctx.fillStyle = '#2c1810';
+                        this.ctx.fillRect(this.player.x + 8, this.player.y - 6, 24, 2);
+                    }
+                } else {
+                    this.ctx.fillStyle = this.powerupStates.hat.active ? '#ffd700' : '#3498db';
+                    this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+                }
+                
+                this.obstacles.forEach(obstacle => {
+                    this.ctx.fillStyle = obstacle.color;
+                    this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    
+                    this.ctx.strokeStyle = '#2c3e50';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = '16px Arial';
+                    this.ctx.textAlign = 'center';
+                    const text = obstacle.type === 'meeting' ? '📅' : 
+                                obstacle.type === 'paperwork' ? '📄' : '💻';
+                    this.ctx.fillText(text, obstacle.x + obstacle.width/2, obstacle.y + obstacle.height/2 + 5);
+                });
+                
+                this.powerups.forEach(powerup => {
+                    if (!powerup.collected) {
+                        this.ctx.fillStyle = '#ffd700';
+                        this.ctx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+                        
+                        this.ctx.fillStyle = 'black';
+                        this.ctx.font = '20px Arial';
+                        this.ctx.textAlign = 'center';
+                        const emoji = powerup.type === 'hat' ? '🎩' :
+                                     powerup.type === 'coffee' ? '☕' :
+                                     powerup.type === 'gamma' ? '💎' : '🍌';
+                        this.ctx.fillText(emoji, powerup.x + powerup.width/2, powerup.y + powerup.height/2 + 5);
+                    }
+                });
+            }
+            
+            updateStats() {
+                const distanceMultiplier = this.powerupStates.coffee.active ? 1.5 : 1;
+                this.distance = Math.floor(this.currentTime * this.gameSpeed * distanceMultiplier / 10) * 10;
+                
+                const scoreBonus = this.powerupStates.coffee.active ? 2 : 1;
+                this.score += scoreBonus;
+                
+                const minutes = Math.floor(this.currentTime / 3600);
+                const seconds = Math.floor((this.currentTime % 3600) / 60);
+                const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('distance').textContent = this.distance;
+                document.getElementById('time').textContent = timeString;
+                document.getElementById('score').textContent = this.score;
+            }
+            
+            gameLoop() {
+                if (this.isPlaying) {
+                    this.currentTime++;
+                    this.gameSpeed = Math.min(6, 3 + (this.currentTime / 1200));
+                    
+                    this.spawnObstacle();
+                    this.spawnPowerup();
+                    
+                    this.updatePlayer();
+                    this.updateObstacles();
+                    this.updatePowerups();
+                    this.updatePowerupStates();
+                    this.checkCollisions();
+                    this.updateBackground();
+                    this.updateStats();
+                }
+                
+                this.draw();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            start() {
+                this.isPlaying = true;
+                this.distance = 0;
+                this.score = 0;
+                this.currentTime = 0;
+                this.gameSpeed = 3;
+                this.hatCollected = false;
+                this.obstacles = [];
+                this.powerups = [];
+                this.achievements = [];
+                
+                this.player = {
+                    x: 100,
+                    y: 280,
+                    width: 40,
+                    height: 60,
+                    velocityY: 0,
+                    isJumping: false,
+                    isSliding: false,
+                    groundY: 280
+                };
+                
+                this.powerupStates = {
+                    hat: { active: false, duration: 0 },
+                    coffee: { active: false, duration: 0 },
+                    gamma: { active: false, duration: 0 }
+                };
+                
+                document.getElementById('startBtn').textContent = '🔄 Restart';
+            }
+            
+            pause() {
+                this.isPlaying = !this.isPlaying;
+                document.getElementById('pauseBtn').textContent = this.isPlaying ? '⏸️ Pause' : '▶️ Resume';
+            }
+            
+            gameOver() {
+                this.isPlaying = false;
+                
+                const minutes = Math.floor(this.currentTime / 3600);
+                const seconds = Math.floor((this.currentTime % 3600) / 60);
+                const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                document.getElementById('finalDistance').textContent = this.distance;
+                document.getElementById('finalTime').textContent = timeString;
+                document.getElementById('finalScore').textContent = this.score;
+                
+                if (this.hatCollected) {
+                    document.getElementById('hatUnlocked').style.display = 'block';
+                }
+                
+                const messages = [
+                    "HR has questions about your departure",
+                    "You didn't make it to your weekend",
+                    "The office caught up with you",
+                    "Security escorted you back to your desk"
+                ];
+                document.getElementById('gameOverTitle').textContent = messages[Math.floor(Math.random() * messages.length)];
+                
+                document.getElementById('gameOverModal').style.display = 'flex';
+            }
+        }
+        
+        const game = new OutOfOfficeRunner();
+        
+        function startGame() {
+            game.start();
+        }
+        
+        function pauseGame() {
+            game.pause();
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOverModal').style.display = 'none';
+            game.start();
+        }
+        
+        function shareScore() {
+            const distance = document.getElementById('finalDistance').textContent;
+            const time = document.getElementById('finalTime').textContent;
+            const hatEmoji = game.hatCollected ? ' 🎩' : '';
+            const text = `I lasted ${time} and traveled ${distance}m before the Office got me${hatEmoji}. Think you can survive longer? #OutOfOfficeGamma`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Out of Office Game',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text + ' ' + window.location.href);
+                alert('Score copied to clipboard!');
+            }
+        }
+        
+        function submitBonusEmail() {
+            const email = document.getElementById('bonusEmail').value;
+            
+            if (email) {
+                alert('Thanks! You\'ve unlocked a bonus life for your next run!');
+                // In a real implementation, you would send this to your backend
+                console.log('Email submitted:', email);
+            } else {
+                alert('Please enter your email to get the bonus life!');
+            }
+        }
+    </script>
+</body>
+</html>
